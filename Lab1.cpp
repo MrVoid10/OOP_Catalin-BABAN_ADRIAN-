@@ -22,7 +22,16 @@ public:
   void addBook(const Book& book) {
     books.push_back(book);
   }
-
+  void removeBook(const std::string& title) {
+        for (auto it = books.begin(); it != books.end(); ++it) {
+            if (it->getTitle() == title) {
+                books.erase(it);
+                std::cout << "Book '" << title << "' removed from the library.\n";
+                return;
+            }
+        }
+        std::cout << "Book '" << title << "' not found in the library.\n";
+    }  
   // Display all books in the library
   void display_All_Books() const {
     for (const Book& book : books) {
