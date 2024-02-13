@@ -76,4 +76,8 @@ int main() {
     std::cout << "Library Contents:\n";
     library.display_All_Books();
 
+  std::string bookToRemove;
+    std::cout << "\nEnter the title of the book to remove: ";
+    std::getline(std::cin, bookToRemove);
+    library.removeBook(bookToRemove);
 return 0;}
