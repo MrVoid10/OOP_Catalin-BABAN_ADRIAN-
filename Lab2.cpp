@@ -4,7 +4,7 @@
 #include <fstream>
 #include <sstream>
 
-# define SAVE "Lab2University.txt"
+# define SAVE "University.txt"
 using namespace std;
 
 void Pause(){
@@ -31,7 +31,11 @@ public:
   Student(string first, string last, string email, string enrollment, string dob)
       : FirstName(first), LastName(last), Email(email), EnrollmentDate(enrollment), DateOfBirth(dob), IsGraduated(false) {}
 
-  void Print_Info() { cout << LastName << ' ' << FirstName << '|' << DateOfBirth << '|' << EnrollmentDate << '|' << Email << endl; }
+  Student(string first, string last, string email, string enrollment, string dob,bool grad)
+      : FirstName(first), LastName(last), Email(email), EnrollmentDate(enrollment), DateOfBirth(dob), IsGraduated(grad) {}
+
+  void Print_Info() { cout << '\n'<< FirstName << '|' << LastName << '|' << Email << '|' << EnrollmentDate << '|'
+    << DateOfBirth;}
 
   const string& GetFirstName(){return FirstName;}
   const string& GetLastName(){return LastName;}
@@ -71,7 +75,7 @@ public:
       student.Print_Info();
     }
     cout << endl;
-  }
+  Pause();}
 
   void DisplayGraduates() {
     cout << "Graduates from " << Name << " faculty:\n";
@@ -81,7 +85,7 @@ public:
       }
     }
     cout << endl;
-  }
+  Pause();}
 
   bool CheckStudent(const string& email) {
     for ( auto& student : students) {
@@ -105,117 +109,124 @@ public:
 };
 
 class University {
-// private:  list<Faculty> faculties;    // este pusa pe public ca imi bag piciorul pana imi dau seama ca nu merge sa accesez extern clasei
+  //private: list<Faculty> faculties;
 
-public:
-  list<Faculty> faculties;
-  void CreateFaculty(string name, string abbreviation, StudyField field) {
-    faculties.push_back(Faculty(name, abbreviation, field));}
+  public:list<Faculty> faculties;
+    void CreateFaculty(string name, string abbreviation, StudyField field) {
+      faculties.push_back(Faculty(name, abbreviation, field));
+    }
 
-  Faculty* FindFacultyByStudentEmail(const string& email) {
-    for (auto& faculty : faculties) {
-      if (faculty.CheckStudent(email)) {
-        return &faculty;
+    Faculty *FindFacultyByStudentEmail(const string &email) {
+      for (auto &faculty : faculties) {
+        if (faculty.CheckStudent(email)) {
+          return &faculty;
+        }
       }
+      return nullptr;
     }
-  return nullptr;}
 
-  void DisplayFaculties() {
-    cout << "University Faculties:\n";
-    for ( auto& faculty : faculties) {
-      cout << "- " << faculty.GetAbreviation() << " Faculty: " << faculty.GetName() << endl;
-    }
-    Pause();
-    cout << endl;
-  }
-
-  void DisplayFacultiesByField(StudyField field) {
-    cout << "Faculties in " << field << " field:\n";
-    for ( auto& faculty : faculties) {
-      if (faculty.GetStudyField() == field) {
+    void DisplayFaculties() {
+      cout << "University Faculties:\n";
+      for (auto &faculty : faculties) {
         cout << "- " << faculty.GetAbreviation() << " Faculty: " << faculty.GetName() << endl;
       }
+      Pause();
+      cout << endl;
     }
-    Pause();
-    cout << endl;
-  }
 
-  void DisplayStudentsInFaculty(const string& abbreviation) {
-    for ( auto& faculty : faculties) {
-      if (faculty.GetAbreviation() == abbreviation) {
-        faculty.DisplayStudents();
-        return;
-      }
-    }
-    cout << "Faculty with abbreviation '" << abbreviation << "' not found!\n";
-  }
-
-  void DisplayGraduatesInFaculty(const string& abbreviation) {
-    for ( auto& faculty : faculties) {
-      if (faculty.GetAbreviation() == abbreviation) {
-        faculty.DisplayGraduates();
-        return;
-      }
-    }
-    cout << "Faculty with abbreviation '" << abbreviation << "' not found!\n";
-  }
-
-  void SaveUniversityData(const string& filename) {
-    ofstream outfile(filename);
-    if (outfile.is_open()) {
-      for (auto& faculty : faculties) {
-        outfile << faculty.GetName() << "|" << faculty.GetAbreviation() << "|" << faculty.GetStudyField() << endl;
-        for (auto& student : faculty.GetStudents()) {
-          outfile << student.GetFirstName() << "|" << student.GetLastName() << "|" << student.GetEmail() << "|" << student.GetIsGraduated() << endl;
+    void DisplayFacultiesByField(StudyField field) {
+      cout << "Faculties in " << field << " field:\n";
+      for (auto &faculty : faculties) {
+        if (faculty.GetStudyField() == field) {
+          cout << "- " << faculty.GetAbreviation() << " Faculty: " << faculty.GetName() << endl;
         }
-        outfile << endl; // Separate faculties with an empty line
       }
-      cout << "University data saved successfully!\n";
-    } else {
-      cout << "Unable to open file for saving!\n";
+      Pause();
+      cout << endl;
     }
-    outfile.close();
-  }
 
-  // Method to load university data from a text file
-  void LoadUniversityData(const string& filename) {
-    ifstream infile(filename);
-    if (infile.is_open()) {
-      string line;
-      while (getline(infile, line)) {
-        string name, abbreviation;
-        int field;
-        stringstream ss(line);
-        getline(ss, name, '|');
-        getline(ss, abbreviation, '|');
-        ss >> field;
-        CreateFaculty(name, abbreviation, static_cast<StudyField>(field));
+    void DisplayStudentsInFaculty(const string &abbreviation) {
+      for (auto &faculty : faculties) {
+        if (faculty.GetAbreviation() == abbreviation) {
+          faculty.DisplayStudents();
+          return;
+        }
+      }
+      cout << "Faculty with abbreviation '" << abbreviation << "' not found!\n";
+    }
 
-        while (getline(infile, line) && !line.empty()) {
-          stringstream ss2(line);
-          string first, last, email;
-          bool isGraduated;
-          getline(ss2, first, '|');
-          getline(ss2, last, '|');
-          getline(ss2, email, '|');
-          ss2 >> isGraduated;
-          faculties.back().AddStudent(Student(first, last, email, "", ""));
-          if (isGraduated) {
-            faculties.back().GetStudents().back().Graduate();
+    void DisplayGraduatesInFaculty(const string &abbreviation) {
+      for (auto &faculty : faculties) {
+        if (faculty.GetAbreviation() == abbreviation) {
+          faculty.DisplayGraduates();
+          return;
+        }
+      }
+      cout << "Faculty with abbreviation '" << abbreviation << "' not found!\n";
+    }
+
+    list<Faculty> &GetFaculties() {
+      return faculties;
+    }
+};
+
+class FileManager {
+  public:
+    static void SaveUniversityData(const string &filename, University &university) {///ceva probleme cu outputul
+      ofstream outfile(filename);
+      if (outfile.is_open()) {
+        for (auto &faculty : university.GetFaculties()) {
+          outfile << faculty.GetName() << "|" << faculty.GetAbreviation() << "|" << faculty.GetStudyField() << endl;
+          for (auto &student : faculty.GetStudents()) {
+            outfile << student.GetFirstName() << "|" << student.GetLastName() << "|" << student.GetEmail()
+            << "|" << student.GetEnrollmentDate() << "|" << student.GetDateOfBirth() << "|" << student.GetIsGraduated() << endl;
+          }
+          outfile << endl; // Separate faculties with an empty line
+        }
+        cout << "University data saved successfully!\n";
+      } else {
+        cout << "Unable to open file for saving!\n";
+      }
+      outfile.close();
+    }
+
+    static void LoadUniversityData(const string &filename, University &university) { ///probleme cu inputul
+      ifstream infile(filename);
+      if (infile.is_open()) {
+        string line;
+        while (getline(infile, line)) {
+          string name, abbreviation;
+          int field;
+          stringstream ss(line);
+          getline(ss, name, '|');
+          getline(ss, abbreviation, '|');
+          ss >> field;
+          university.CreateFaculty(name, abbreviation, static_cast<StudyField>(field));
+
+          while (getline(infile, line) && !line.empty()) {
+            stringstream ss2(line);
+            string first, last, email,enroll,birth;
+            bool isGraduated = false;
+            getline(ss2, first, '|');
+            getline(ss2, last, '|');
+            getline(ss2, enroll, '|');
+            getline(ss2, birth, '|');
+            ss2 >> isGraduated;
+            university.GetFaculties().back().AddStudent(Student(first, last, email, enroll, birth,isGraduated));
           }
         }
+        cout << "University data loaded successfully!\n";
+      } else {
+        cout << "Unable to open file for loading!\n";
       }
-      cout << "University data loaded successfully!\n";
-    } else {
-      cout << "Unable to open file for loading!\n";
+      infile.close();
     }
-    infile.close();
-  }
 };
+
 
 int main() {
   University tum;
-  tum.LoadUniversityData(SAVE);
+  FileManager::LoadUniversityData(SAVE,tum);
   int choice;
 
   do {
@@ -380,7 +391,7 @@ int main() {
       break;}
       case 0:   // Exiting the Program
         cout << "Exiting...\n";
-        tum.SaveUniversityData(SAVE);
+        FileManager::SaveUniversityData(SAVE,tum);
         break;
       default:
         cout << "Invalid choice!\n";
