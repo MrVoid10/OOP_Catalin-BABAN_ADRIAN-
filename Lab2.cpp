@@ -1,11 +1,15 @@
 #include <iostream>
 #include <string>
 #include <list>
+#include <fstream>
+#include <sstream>
 
+# define SAVE "University.txt"
 using namespace std;
 
 void Pause(){
   cout << "\nPress Enter to continue...";
+  cin.ignore();
   getchar();
 }
 
@@ -31,11 +35,10 @@ public:
 
   const string& GetFirstName(){return FirstName;}
   const string& GetLastName(){return LastName;}
-
-
   const string& GetEmail() { return Email; }
-
-  bool GetIsGraduated() { return IsGraduated; }
+  const string& GetEnrollmentDate() { return EnrollmentDate; }
+  const string& GetDateOfBirth() { return DateOfBirth; }
+  const bool GetIsGraduated() { return IsGraduated; }
 
   void Graduate() { IsGraduated = true; }
 };
@@ -107,8 +110,7 @@ class University {
 public:
   list<Faculty> faculties;
   void CreateFaculty(string name, string abbreviation, StudyField field) {
-    faculties.push_back(Faculty(name, abbreviation, field));
-  }
+    faculties.push_back(Faculty(name, abbreviation, field));}
 
   Faculty* FindFacultyByStudentEmail(const string& email) {
     for (auto& faculty : faculties) {
@@ -116,8 +118,7 @@ public:
         return &faculty;
       }
     }
-    return nullptr;
-  }
+  return nullptr;}
 
   void DisplayFaculties() {
     cout << "University Faculties:\n";
@@ -158,10 +159,63 @@ public:
     }
     cout << "Faculty with abbreviation '" << abbreviation << "' not found!\n";
   }
+
+  void SaveUniversityData(const string& filename) {
+    ofstream outfile(filename);
+    if (outfile.is_open()) {
+      for (auto& faculty : faculties) {
+        outfile << faculty.GetName() << "|" << faculty.GetAbreviation() << "|" << faculty.GetStudyField() << endl;
+        for (auto& student : faculty.GetStudents()) {
+          outfile << student.GetFirstName() << "|" << student.GetLastName() << "|" << student.GetEmail() << "|" << student.GetIsGraduated() << endl;
+        }
+        outfile << endl; // Separate faculties with an empty line
+      }
+      cout << "University data saved successfully!\n";
+    } else {
+      cout << "Unable to open file for saving!\n";
+    }
+    outfile.close();
+  }
+
+  // Method to load university data from a text file
+  void LoadUniversityData(const string& filename) {
+    ifstream infile(filename);
+    if (infile.is_open()) {
+      string line;
+      while (getline(infile, line)) {
+        string name, abbreviation;
+        int field;
+        stringstream ss(line);
+        getline(ss, name, '|');
+        getline(ss, abbreviation, '|');
+        ss >> field;
+        CreateFaculty(name, abbreviation, static_cast<StudyField>(field));
+
+        while (getline(infile, line) && !line.empty()) {
+          stringstream ss2(line);
+          string first, last, email;
+          bool isGraduated;
+          getline(ss2, first, '|');
+          getline(ss2, last, '|');
+          getline(ss2, email, '|');
+          ss2 >> isGraduated;
+          faculties.back().AddStudent(Student(first, last, email, "", ""));
+          if (isGraduated) {
+            faculties.back().GetStudents().back().Graduate();
+          }
+        }
+      }
+      cout << "University data loaded successfully!\n";
+    } else {
+      cout << "Unable to open file for loading!\n";
+    }
+    infile.close();
+  }
 };
 
 int main() {
   University tum;
+  tum.LoadUniversityData(SAVE);
   int choice;
 
   do {
@@ -318,7 +372,6 @@ int main() {
             cout << "Enter the field (0-4): ";
             cin >> field;
             tum.DisplayFacultiesByField(static_cast<StudyField>(field));
-            Pause();
             break;}
           case 0: {break;}
           default:
@@ -327,6 +380,7 @@ int main() {
       break;}
       case 0:   // Exiting the Program
         cout << "Exiting...\n";
+        tum.SaveUniversityData(SAVE);
         break;
       default:
         cout << "Invalid choice!\n";
@@ -335,4 +389,3 @@ int main() {
 
   return 0;
 }
-
