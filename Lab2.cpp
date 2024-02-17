@@ -4,7 +4,7 @@
 #include <fstream>
 #include <sstream>
 
-# define SAVE "University.txt"
+# define SAVE "Lab2University.txt"
 using namespace std;
 
 void Pause(){
