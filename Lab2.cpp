@@ -3,6 +3,7 @@
 #include <list>
 #include <fstream>
 #include <sstream>
+#include <ctime>
 
 # define SAVE "University.txt"
 
@@ -216,6 +217,75 @@ class FileManager {
       infile.close();
     }
 };
+
+enum Level{
+  ERROR,
+  WARNING,
+  INFO,
+  DEBUG
+};
+
+class Log {
+private:
+    Level logLevel;
+
+public:
+    // Constructor to set the log level
+    Log(Level level) : logLevel(level) {}
+
+    // Log message based on log level
+    void LogMessage(Level level, const std::string &message) {
+        if (logLevel >= level) {
+            std::ofstream logfile("log.txt", std::ios::app);
+            if (!logfile.is_open()) {
+                std::cerr << "Error: Unable to open log file for writing!" << std::endl;
+                return;
+            }
+
+            std::string levelString;
+            switch (level) {
+                case Level::ERROR:
+                    levelString = "ERROR";
+                    break;
+                case Level::WARNING:
+                    levelString = "WARNING";
+                    break;
+                case Level::INFO:
+                    levelString = "INFO";
+                    break;
+                case Level::DEBUG:
+                    levelString = "DEBUG";
+                    break;
+            }
+
+            time_t now = time(nullptr);
+            tm *timeinfo = localtime(&now);
+            char buffer[80];
+            strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeinfo);
+
+            logfile << "[" << buffer << "] [" << levelString << "] " << message << std::endl;
+            logfile.close();
+        }
+    }
+
+    // Macros for logging messages with different levels
+    void MError(const std::string &message) {
+        LogMessage(Level::ERROR, message);
+    }
+
+    void MWarn(const std::string &message) {
+        LogMessage(Level::WARNING, message);
+    }
+
+    void MInfo(const std::string &message) {
+        LogMessage(Level::INFO, message);
+    }
+
+    void MDebug(const std::string &message) {
+        LogMessage(Level::DEBUG, message);
+    }
+};
+
 
 int main() {
   University tum;
