@@ -234,12 +234,29 @@ public:
     Log(Level level) : logLevel(level) {}
 
     // Log message based on log level
+    void createLogFile() {
+        std::ofstream createFile("log.txt");
+        if (!createFile.is_open()) {
+            std::cerr << "Error: Unable to create log file!" << std::endl;
+        } else {
+            std::cerr << "Log file created successfully!" << std::endl;
+        }
+    }
+
+    // Log message based on log level
     void LogMessage(Level level, const std::string &message) {
         if (logLevel >= level) {
             std::ofstream logfile("log.txt", std::ios::app);
             if (!logfile.is_open()) {
                 std::cerr << "Error: Unable to open log file for writing!" << std::endl;
-                return;
+                // Create the log file if it doesn't exist
+                createLogFile();
+                // Try opening the log file again
+                logfile.open("log.txt", std::ios::app);
+                if (!logfile.is_open()) {
+                    std::cerr << "Error: Unable to open log file even after creation!" << std::endl;
+                    return;
+                }
             }
 
             std::string levelString;
@@ -286,37 +303,39 @@ public:
     }
 };
 
-
 int main() {
   University tum;
-  FileManager::LoadUniversityData(SAVE,tum);
+  Log log(Level::DEBUG);
+  log.MDebug("Trying to load the univesity.txt file");
+  FileManager::LoadUniversityData(SAVE, tum);
   int choice;
 
   do {
     system("CLS");
     cout << "TUM Board Menu:\n"
-            "1. Faculty Operations\n"
-            "2. General Operations\n"
-            "0. Exit\n"
-            "Enter your choice: ";
+         << "1. Faculty Operations\n"
+         << "2. General Operations\n"
+         << "0. Exit\n"
+         << "Enter your choice: ";
     cin >> choice;
     system("CLS");
 
     switch (choice) {
+      log.MInfo("Selected Faculty Operations: " + to_string(choice));
       case 1: { // Faculty Choice
         int facultyChoice;
         cout << "Faculty Operations:\n"
-                "1. Create and assign a student to a faculty\n"
-                "2. Graduate a student from a faculty\n"
-                "3. Display current enrolled students\n"
-                "4. Display graduates\n"
-                "5. Check if a student belongs to a faculty\n"
-                "0. Return to the Board Menu\n"
-                "Enter your choice: ";
+             << "1. Create and assign a student to a faculty\n"
+             << "2. Graduate a student from a faculty\n"
+             << "3. Display current enrolled students\n"
+             << "4. Display graduates\n"
+             << "5. Check if a student belongs to a faculty\n"
+             << "0. Return to the Board Menu\n"
+             << "Enter your choice: ";
         cin >> facultyChoice;
         system("CLS");
 
-        switch (facultyChoice) {// Faculty choice
+        switch (facultyChoice) { // Faculty choice
           case 1: {
             string first, last, email, enrollment, dob;
             cout << "Enter student first name: ";
@@ -339,35 +358,51 @@ int main() {
             system("CLS");
 
             bool facultyFound = false;
-            for (auto& f : tum.faculties) {
+            for (auto &f : tum.faculties) {
               if (f.GetAbreviation() == abbreviation) {
                 f.AddStudent(student);
                 cout << "Student added to " << f.GetName() << " faculty.\n";
+                log.MInfo("Student added to " + f.GetName() + " faculty.");
                 facultyFound = true;
+
+
+                FileManager::SaveUniversityData(SAVE, tum);
+                log.MInfo("Saved the operation in the file.");
                 break;
               }
             }
 
             if (!facultyFound) {
               cout << "Faculty with abbreviation '" << abbreviation << "' not found!\n";
+              log.MError("Faculty with abbreviation '" + abbreviation + "' not found when adding a student.");
+            Pause();
+            break;
             }
-          Pause();
-          break;}
+            FileManager::SaveUniversityData(SAVE, tum);
+            log.MInfo("Saved dada in the file.");
+            Pause();
+            break;
+          }
           case 2: {
             string email;
             system("CLS");
             cout << "Enter student email to graduate: ";
             cin >> email;
 
+            log.MInfo("Attempting to graduate student with email: " + email);
 
-            Faculty* faculty = tum.FindFacultyByStudentEmail(email);
+            Faculty *faculty = tum.FindFacultyByStudentEmail(email);
             if (faculty != nullptr) {
               faculty->GraduateStudent(email);
+              FileManager::SaveUniversityData(SAVE, tum);
+              log.MInfo("Saved dada in the file.");
             } else {
               cout << "Student with email '" << email << "' not found in any faculty.\n";
+              log.MWarn("Attempted to graduate student with email '" + email + "', but student not found.");
             }
-          Pause();
-          break;}
+            Pause();
+            break;
+          }
           case 3: {
             string abbreviation;
             cout << "Enter faculty abbreviation to display current enrolled students: ";
@@ -388,28 +423,35 @@ int main() {
             cout << "Enter student email to check: ";
             cin >> email;
 
+            log.MInfo("Checking if student with email '" + email + "' belongs to any faculty.");
 
-            Faculty* faculty = tum.FindFacultyByStudentEmail(email);
+            Faculty *faculty = tum.FindFacultyByStudentEmail(email);
             if (faculty != nullptr) {
-              cout << "Student with email '" << email << "' belongs to " << faculty->GetName() << " faculty, the abreviation: " << faculty->GetAbreviation();
+              cout << "Student with email '" << email << "' belongs to " << faculty->GetName() << " faculty, the abbreviation: " << faculty->GetAbreviation();
+              log.MInfo("Student with email '" + email + "' belongs to " + faculty->GetName() + " faculty.");
             } else {
               cout << "Student with email '" << email << "' not found in any faculty.\n";
+              log.MWarn("Student with email '" + email + "' not found in any faculty.");
             }
-          Pause();
-          break;}
-          case 0: {break;}
+            Pause();
+            break;
+          }
+          case 0: { break; }
           default:
             cout << "Invalid choice!\n";
-        }break;}
+            log.MWarn("Invalid choice entered in faculty operations.");
+        }
+        break;
+      }
       case 2: { // General Choice
         int generalChoice;
         cout << "General Operations:\n"
-                "1. Create a new faculty\n"
-                "2. Search what faculty a student belongs to\n"
-                "3. Display University faculties\n"
-                "4. Display faculties belonging to a field\n"
-                "0. Return to the Board Menu\n"
-                "Enter your choice: ";
+             << "1. Create a new faculty\n"
+             << "2. Search what faculty a student belongs to\n"
+             << "3. Display University faculties\n"
+             << "4. Display faculties belonging to a field\n"
+             << "0. Return to the Board Menu\n"
+             << "Enter your choice: ";
         cin >> generalChoice;
         system("CLS");
 
@@ -425,44 +467,59 @@ int main() {
             cin >> field;
             tum.CreateFaculty(name, abbreviation, static_cast<StudyField>(field));
             cout << "Faculty created successfully!\n";
+            log.MInfo("Faculty created successfully: " + abbreviation);
+
+            FileManager::SaveUniversityData(SAVE, tum);
+            log.MInfo("Saved dada in the file.");
             Pause();
-          break;}
+            break;
+          }
           case 2: {
             string email;
             system("CLS");
             cout << "Enter student email to search: ";
             cin >> email;
 
+            log.MInfo("Searching faculty for student with email: " + email);
 
-            Faculty* faculty = tum.FindFacultyByStudentEmail(email);
+            Faculty *faculty = tum.FindFacultyByStudentEmail(email);
             if (faculty != nullptr) {
               cout << "Student with email '" << email << "' belongs to " << faculty->GetName() << " faculty.\n";
+              log.MInfo("Student with email '" + email + "' belongs to " + faculty->GetName() + " faculty.");
             } else {
               cout << "Student with email '" << email << "' not found in any faculty.\n";
+              log.MWarn("Student with email '" + email + "' not found in any faculty.");
             }
             Pause();
-          break;}
+            break;
+          }
           case 3: {
             tum.DisplayFaculties();
-          break;}
+            break;
+          }
           case 4: {
             int field;
             cout << "Enter the field (0-4): ";
             cin >> field;
             tum.DisplayFacultiesByField(static_cast<StudyField>(field));
             Pause();
-          break;}
-          case 0: {break;}
+            break;
+          }
+          case 0: { break; }
           default:
             cout << "Invalid choice!\n";
-          }
-      break;}
-      case 0:   // Exiting the Program
+            log.MWarn("Invalid choice entered in general operations.");
+        }
+        break;
+      }
+      case 0: // Exiting the Program
         cout << "Exiting...\n";
-        FileManager::SaveUniversityData(SAVE,tum);
+        FileManager::SaveUniversityData(SAVE, tum);
+        log.MInfo("Exiting the program.");
         break;
       default:
         cout << "Invalid choice!\n";
+        log.MWarn("Invalid choice entered in main menu.");
     }
   } while (choice);
 
