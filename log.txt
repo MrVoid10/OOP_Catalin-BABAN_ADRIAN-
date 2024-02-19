@@ -1,0 +1,4 @@
+[2024-02-19 21:06:51] [DEBUG] Trying to load the univesity.txt file
+[2024-02-19 21:07:02] [INFO] Attempting to graduate student with email: ion@yahoo.com
+[2024-02-19 21:07:11] [WARNING] Invalid choice entered in general operations.
+[2024-02-19 21:07:22] [INFO] Exiting the program.
