@@ -5,6 +5,7 @@
 #include <sstream>
 
 # define SAVE "University.txt"
+
 using namespace std;
 
 void Pause(){
@@ -141,7 +142,6 @@ class University {
           cout << "- " << faculty.GetAbreviation() << " Faculty: " << faculty.GetName() << endl;
         }
       }
-      Pause();
       cout << endl;
     }
 
@@ -281,13 +281,14 @@ int main() {
             if (!facultyFound) {
               cout << "Faculty with abbreviation '" << abbreviation << "' not found!\n";
             }
-            break;
-          }
+          Pause();
+          break;}
           case 2: {
             string email;
+            system("CLS");
             cout << "Enter student email to graduate: ";
             cin >> email;
-            system("CLS");
+
 
             Faculty* faculty = tum.FindFacultyByStudentEmail(email);
             if (faculty != nullptr) {
@@ -295,8 +296,8 @@ int main() {
             } else {
               cout << "Student with email '" << email << "' not found in any faculty.\n";
             }
-            break;
-          }
+          Pause();
+          break;}
           case 3: {
             string abbreviation;
             cout << "Enter faculty abbreviation to display current enrolled students: ";
@@ -313,18 +314,19 @@ int main() {
           }
           case 5: {
             string email;
+            system("CLS");
             cout << "Enter student email to check: ";
             cin >> email;
-            system("CLS");
+
 
             Faculty* faculty = tum.FindFacultyByStudentEmail(email);
             if (faculty != nullptr) {
-              cout << "Student with email '" << email << "' belongs to " << faculty->GetName() << " faculty.\n";
+              cout << "Student with email '" << email << "' belongs to " << faculty->GetName() << " faculty, the abreviation: " << faculty->GetAbreviation();
             } else {
               cout << "Student with email '" << email << "' not found in any faculty.\n";
             }
-            break;
-          }
+          Pause();
+          break;}
           case 0: {break;}
           default:
             cout << "Invalid choice!\n";
@@ -353,12 +355,14 @@ int main() {
             cin >> field;
             tum.CreateFaculty(name, abbreviation, static_cast<StudyField>(field));
             cout << "Faculty created successfully!\n";
+            Pause();
           break;}
           case 2: {
             string email;
+            system("CLS");
             cout << "Enter student email to search: ";
             cin >> email;
-            system("CLS");
+
 
             Faculty* faculty = tum.FindFacultyByStudentEmail(email);
             if (faculty != nullptr) {
@@ -376,11 +380,12 @@ int main() {
             cout << "Enter the field (0-4): ";
             cin >> field;
             tum.DisplayFacultiesByField(static_cast<StudyField>(field));
-            break;}
+            Pause();
+          break;}
           case 0: {break;}
           default:
             cout << "Invalid choice!\n";
-        }
+          }
       break;}
       case 0:   // Exiting the Program
         cout << "Exiting...\n";
