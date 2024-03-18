@@ -83,13 +83,11 @@ def status_all():
                 print(f"{filename} - Unchanged.")
 
 def save_commits():
-    create_snapshot_folder()
     with open(COMMIT_FILE, "w") as f:
-        f.write(f"Snapshot time: {time.ctime(SNAPSHOT_TIME)}\n")
-        f.write("File list:\n")
+        f.write(f"{time.ctime(SNAPSHOT_TIME)}\n")
         for filename in FILE_LIST:
             f.write(f"{filename}\n")
-    print(f"Commits saved to {COMMIT_FILE}")
+    print(f"Commits saved to {COMMIT_FILE}.")
 
 def load_commits():
     if os.path.exists(COMMIT_FILE):
@@ -98,8 +96,8 @@ def load_commits():
             lines = f.readlines()
             global SNAPSHOT_TIME
             global FILE_LIST
-            SNAPSHOT_TIME = time.mktime(time.strptime(lines[0].split(":")[1].strip(), "%a %b %d %H:%M:%S %Y"))
-            FILE_LIST = [line.strip() for line in lines[2:]]
+            SNAPSHOT_TIME = time.mktime(time.strptime(lines[0].strip(), "%a %b %d %H:%M:%S %Y"))
+            FILE_LIST = [line.strip() for line in lines[1:]]
             print("Commits loaded from file.")
 
 def detect_changes():
