@@ -8,7 +8,7 @@ SNAPSHOT_TIME = None
 DETECTION_INTERVAL = 5
 FILE_LIST = []
 SNAPSHOT_FOLDER = os.path.join(FOLDER_PATH, "SnapShots")
-COMMIT_FILE = os.path.join(SNAPSHOT_FOLDER, "commits.txt")
+COMMIT_FILE = os.path.join(SNAPSHOT_FOLDER, "snapshot.txt")
 
 def create_snapshot_folder():
     if not os.path.exists(SNAPSHOT_FOLDER):
@@ -83,7 +83,7 @@ def status_all():
                 print(f"{filename} - Unchanged.")
 
 def save_commits():
-    with open(COMMIT_FILE, "w") as f:
+    with open(COMMIT_FILE, "w") as f:e
         f.write(f"{time.ctime(SNAPSHOT_TIME)}\n")
         for filename in FILE_LIST:
             f.write(f"{filename}\n")
