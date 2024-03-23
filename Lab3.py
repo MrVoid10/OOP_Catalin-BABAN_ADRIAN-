@@ -4,126 +4,142 @@ import threading
 import json
 
 FOLDER_PATH = "E:\\TEMPORARE\\Catalin_OOP\\MyGit"
-SNAPSHOT_TIME = None
-DETECTION_INTERVAL = 5
-FILE_LIST = []
 SNAPSHOT_FOLDER = os.path.join(FOLDER_PATH, "SnapShots")
-COMMIT_FILE = os.path.join(SNAPSHOT_FOLDER, "snapshot.txt")
+SNAPSHOT_TIME = None
+CurrentSnapshot = []
+CurrentCommit = []
+LastSnapshot = []
+FILE_CURRENT_LIST = []
+FILE_NAME_LIST = os.listdir(FOLDER_PATH)
 
-def create_snapshot_folder():
-    if not os.path.exists(SNAPSHOT_FOLDER):
-        os.makedirs(SNAPSHOT_FOLDER)
+class FileInfo:
+    def __init__(self, filename, size, created, modified):
+        self.filename = filename
+        self.size = size
+        self.created = created
+        self.modified = modified
 
-def commit():
-    global SNAPSHOT_TIME
-    global FILE_LIST
-    SNAPSHOT_TIME = time.time()
-    FILE_LIST = os.listdir(FOLDER_PATH)
-    print("Snapshot time updated to:", time.ctime(SNAPSHOT_TIME))
-    save_commits()
-
-def get_file_info(filename):
+def get_meta_info(filename):
     filepath = os.path.join(FOLDER_PATH, filename)
     if not os.path.exists(filepath):
         print(f"File '{filename}' not found.")
-        return
+        return None
 
     stat = os.stat(filepath)
-    print(f"File: {filename}")
-    print(f"Extension: {os.path.splitext(filename)[1]}")
-    print(f"Created: {time.ctime(stat.st_ctime)}")
-    print(f"Last modified: {time.ctime(stat.st_mtime)}")
+    file_info = FileInfo(
+        filename=filename,
+        size=stat.st_size,
+        created=time.ctime(stat.st_ctime),
+        modified=time.ctime(stat.st_mtime)
+    )
+    return file_info
 
-    if filename.lower().endswith((".png", ".jpg")):
-        print("Image file info (TODO):")
-    elif filename.lower().endswith(".txt"):
-        with open(filepath, "r") as file:
-            lines = file.readlines()
-            word_count = sum(len(line.split()) for line in lines)
-            char_count = sum(len(line) for line in lines)
-            print(f"Line count: {len(lines)}")
-            print(f"Word count: {word_count}")
-            print(f"Character count: {char_count}")
-    elif filename.lower().endswith((".py", ".java")):
-        print("Program file info (TODO):")
+def Search():
+    file_info_list = []  # a list of FileInfo objects
+    file_name_list = os.listdir(FOLDER_PATH)
+    
+    for file_name in file_name_list:
+        file_info = get_meta_info(file_name)
+        if file_info:  # Check if get_meta_info() returned a valid FileInfo object
+            file_info_list.append(file_info)
+#    RETURN_LIST = file_info_list
+    return file_info_list
+
+def save_a_snapshot(SAVE_NAME):
+    global CurrentSnapshot
+    
+    CurrentSnapshot = Search() # salvat 
+    snapshot_data = json.dumps([ob.__dict__ for ob in CurrentSnapshot], indent=2)
+
+    snapshot_file_path = os.path.join(SNAPSHOT_FOLDER, SAVE_NAME)
+    snapshot_time_path = os.path.join(SNAPSHOT_FOLDER, "Created.txt")
+    
+    snap = time.time()
+    with open(snapshot_time_path, "w") as sTime:
+        sTime.write(f"{time.ctime(snap)}\n")
+        sTime.close()
+    
+    with open(snapshot_file_path, "w") as snapshot_file:
+        snapshot_file.write(snapshot_data)
+        print(f"Snapshot saved to {SAVE_NAME}") #test
+
+def read_snapshot(SAVE_NAME):
+    global SNAPSHOT_TIME
+    snapshot_file_path = os.path.join(SNAPSHOT_FOLDER, SAVE_NAME)
+    snapshot_time_path = os.path.join(SNAPSHOT_FOLDER, "Created.txt")
+
+    with open(snapshot_time_path, 'r') as t:
+        SNAPSHOT_TIME = t.read().strip()
+        t.close
+
+    with open(snapshot_file_path, 'r') as json_file:
+        data = json.load(json_file)
+
+    file_info_list = []
+
+    for item in data:
+        file_info = FileInfo(
+            filename=item['filename'],
+            size=item['size'],
+            created=item['created'],
+            modified=item['modified']
+        )
+        file_info_list.append(file_info)
+    return file_info_list
+
+def print_file_info(file_list):
+    if file_list:
+        print("not empty")
     else:
-        print("Unsupported file type.")
+        print("empty")
 
-def status_changes():
-    if SNAPSHOT_TIME is None:
-        print("Snapshot not taken yet. Use 'commit' to take a snapshot.")
-        return
+    for file in file_list:
+        print(f"File:  {file.filename} \t\t {file.size} bytes \t\t Ct: {file.created} \t\t Md: {file.modified}")
 
-    current_files = os.listdir(FOLDER_PATH)
-    for filename in FILE_LIST:
-        if filename not in current_files:
-            print(f"{filename} - File has been deleted or removed.")
+def check_modified_objects(FirstList, LastList):
+    last_filenames = {file_info.filename for file_info in LastList}
+    #print("Check 5 Second")
+    
+    for current_file_info in FirstList:
+        if current_file_info.filename not in last_filenames:
+            print(f"{current_file_info.filename} - New file")
         else:
-            filepath = os.path.join(FOLDER_PATH, filename)
-            stat = os.stat(filepath)
-            if stat.st_mtime > SNAPSHOT_TIME:
-                print(f"{filename} - Changed since snapshot.")
+            last_file_info = next(file_info for file_info in LastList if file_info.filename == current_file_info.filename)
+            if current_file_info.modified != last_file_info.modified or current_file_info.size != last_file_info.size:
+                print(f"{current_file_info.filename} - Has been modified")
 
-def status_all():
-    if SNAPSHOT_TIME is None:
-        print("Snapshot not taken yet. Use 'commit' to take a snapshot.")
-        return
+    # Check deleted files
+    for last_file_info in LastList:
+        if last_file_info.filename not in {file_info.filename for file_info in FirstList}:
+            print(f"{last_file_info.filename} - Has been deleted")
 
-    print("Status (All Files):")
-    current_files = os.listdir(FOLDER_PATH)
-    for filename in FILE_LIST:
-        if filename not in current_files:
-            print(f"{filename} - File has been deleted or removed.")
-        else:
-            filepath = os.path.join(FOLDER_PATH, filename)
-            stat = os.stat(filepath)
-            if stat.st_mtime > SNAPSHOT_TIME:
-                print(f"{filename} - Changed since snapshot.")
-            else:
-                print(f"{filename} - Unchanged.")
-
-def save_commits():
-    with open(COMMIT_FILE, "w") as f:e
-        f.write(f"{time.ctime(SNAPSHOT_TIME)}\n")
-        for filename in FILE_LIST:
-            f.write(f"{filename}\n")
-    print(f"Commits saved to {COMMIT_FILE}.")
-
-def load_commits():
-    if os.path.exists(COMMIT_FILE):
-        print(f"Loading commits from {COMMIT_FILE}")
-        with open(COMMIT_FILE, "r") as f:
-            lines = f.readlines()
-            global SNAPSHOT_TIME
-            global FILE_LIST
-            SNAPSHOT_TIME = time.mktime(time.strptime(lines[0].strip(), "%a %b %d %H:%M:%S %Y"))
-            FILE_LIST = [line.strip() for line in lines[1:]]
-            print("Commits loaded from file.")
-
-def detect_changes():
+def repeat_check():
+    global LastSnapshot, CurrentSnapshot  # Declare them as global
     while True:
-        time.sleep(DETECTION_INTERVAL)
-        status_changes()
-
-load_commits()
-
-detection_thread = threading.Thread(target=detect_changes)
-detection_thread.daemon = True
-detection_thread.start()
+        LastSnapshot = CurrentSnapshot
+        CurrentSnapshot = Search()  # Replace with your actual Search function
+        check_modified_objects(CurrentSnapshot, LastSnapshot)
+        time.sleep(5)
 
 while True:  # main
-    action = input("Enter action (commit/info/status_all/status_changes/exit): ").strip().lower()
+    CurrentCommit = LastSnapshot = CurrentSnapshot = read_snapshot("Snapshot.json") # incarcarea la inceput de program
+    thread = threading.Thread(target=repeat_check, daemon=True)
+    thread.start()
+
+    action = input("Enter action (commit | info | status | exit): ").strip().lower()
+    
     if action == "commit":
-        commit()
-    elif action.startswith("info "):
-        filename = action.split(maxsplit=1)[1]
-        get_file_info(filename)
-    elif action == "status_all":
-        status_all()
-    elif action == "status_changes":
-        status_changes()
+        save_a_snapshot("Snapshot.json")
+    
+    elif action == "info":
+        print_file_info(CurrentSnapshot)
+    
+    elif action == "status": # status between CurrentSnapshot and last Commit
+        CurrentSnapshot = Search()
+        check_modified_objects(CurrentSnapshot,CurrentCommit)
+        
     elif action == "exit":
         print("Exiting program.")
         break
     else:
-        print("Invalid action. Available actions: commit, info <filename>, status_all, status_changes, exit")
+        print("Invalid action. Available actions: (commit | info | status | exit)")
