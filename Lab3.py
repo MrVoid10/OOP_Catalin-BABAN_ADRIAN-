@@ -149,7 +149,7 @@ while True:  # main
 
     
 
-    action = input("Enter action (commit | info | infoc | status | llcommit| lncommit | exit): ").strip().lower()
+    action = input("Enter action (commit | info | infoc | status | llcommit | lncommit | exit): ").strip().lower()
     
     if action == "commit":
         T = Snapshot()
