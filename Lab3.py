@@ -3,7 +3,7 @@ import time
 import threading
 import json
 
-FOLDER_PATH = "E:\\TEMPORARE\\Catalin_OOP\\MyGit"
+FOLDER_PATH = "E:\TEMPORARE\Catalin_OOP\MyGit"
 SNAPSHOT_FOLDER = os.path.join(FOLDER_PATH, "SnapShots")
 SNAPSHOT_TIME = None
 CurrentSnapshot = []
