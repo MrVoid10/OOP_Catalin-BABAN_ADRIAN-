@@ -200,13 +200,9 @@ while True:  # main
             other_word = words[1]
             if other_word == "commit" or other_word == "c":
                 check_modified_objects(CurrentSnapshot,CurrentCommit)
-            elif other_word == "snapshot" or other_word == "s":
-                LastSnapshot = CurrentSnapshot
-                CurrentSnapshot = Search()
-                check_modified_objects(CurrentSnapshot,LastSnapshot)
         else:
             CurrentSnapshot = Search()
-            check_modified_objects(CurrentSnapshot,CurrentCommit)
+            check_modified_objects(CurrentSnapshot,LastSnapshot)
 
     elif action == "exit":
         print("Exiting program.")
