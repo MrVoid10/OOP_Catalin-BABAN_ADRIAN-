@@ -3,8 +3,10 @@ import time
 import threading
 import json
 import struct
+import pickle
 
 FOLDER_PATH = "E:\TEMPORARE\Catalin_OOP\MyGit"
+SnapListName = "CommitList.json"
 SNAPSHOT_FOLDER = os.path.join(FOLDER_PATH, "SnapShots")
 SNAPSHOT_TIME = None
 CurrentSnapshot = []
@@ -20,6 +22,34 @@ class FileInfo:
         self.created = created
         self.modified = modified
         self.specific = specific
+
+class Snapshot:
+    def __init__(self):
+        self.time = time.time()
+        self.file_info_list = []
+
+class SnapListEncoder(json.JSONEncoder):
+    def default(self, obj):
+        entry = dict(obj.__dict__)
+        entry['__class__'] = obj.__class__.__name__
+        return entry
+
+class SnapListDecoder(json.JSONDecoder):
+    def __init__(self):
+        json.JSONDecoder.__init__(self, object_hook=self.dict_to_object)
+
+    def dict_to_object(self, dictionary):
+        if dictionary.get("__class__") == "FileInfo":
+            obj = FileInfo.__new__(FileInfo)
+        elif dictionary.get("__class__") == "Snapshot":
+            obj = Snapshot.__new__(Snapshot)
+        else:
+            return dictionary
+
+        for key, value in dictionary.items():
+            if key != '__class__':
+                setattr(obj, key, value)
+        return obj
 
 def get_meta_info(filename):
     if filename == "SnapShots":
@@ -64,49 +94,6 @@ def Search():
 #    RETURN_LIST = file_info_list
     return file_info_list
 
-def save_a_snapshot(SAVE_NAME):
-    global CurrentSnapshot
-    
-    CurrentSnapshot = Search() # salvat 
-    snapshot_data = json.dumps([ob.__dict__ for ob in CurrentSnapshot], indent=2)
-
-    snapshot_file_path = os.path.join(SNAPSHOT_FOLDER, SAVE_NAME)
-    snapshot_time_path = os.path.join(SNAPSHOT_FOLDER, "Created.txt")
-    
-    snap = time.time()
-    with open(snapshot_time_path, "w") as sTime:
-        sTime.write(f"{time.ctime(snap)}\n")
-        sTime.close()
-    
-    with open(snapshot_file_path, "w") as snapshot_file:
-        snapshot_file.write(snapshot_data)
-        print(f"Snapshot saved to {SAVE_NAME}") #test
-
-def read_snapshot(SAVE_NAME):
-    global SNAPSHOT_TIME
-    snapshot_file_path = os.path.join(SNAPSHOT_FOLDER, SAVE_NAME)
-    snapshot_time_path = os.path.join(SNAPSHOT_FOLDER, "Created.txt")
-
-    with open(snapshot_time_path, 'r') as t:
-        SNAPSHOT_TIME = t.read().strip()
-        t.close
-
-    with open(snapshot_file_path, 'r') as json_file:
-        data = json.load(json_file)
-
-    file_info_list = []
-
-    for item in data:
-        file_info = FileInfo(
-            filename=item['filename'],
-            size=item['size'],
-            created=item['created'],
-            modified=item['modified'],
-            specific=item['specific']
-        )
-        file_info_list.append(file_info)
-    return file_info_list
-
 def print_file_info(file_list):
     if file_list:
         print("not empty")
@@ -141,22 +128,41 @@ def repeat_check():
         check_modified_objects(CurrentSnapshot, LastSnapshot)
         time.sleep(5)
 
+def SaveAllCommits(tree):
+    with open(os.path.join(SNAPSHOT_FOLDER,SnapListName), 'w') as file:
+        json.dump(tree, file, cls=SnapListEncoder)
+
+def LoadAllCommits():
+    with open(os.path.join(SNAPSHOT_FOLDER,SnapListName), 'r') as file:
+        tree = json.load(file, cls=SnapListDecoder)
+    return tree
+
 while True:  # main
+    tree = []
     try:
-        CurrentCommit = LastSnapshot = CurrentSnapshot = read_snapshot("Snapshot.json") # incarcarea la inceput de program
+        tree = LoadAllCommits()
+        CurrentCommit = LastSnapshot = CurrentSnapshot = tree[-1].file_info_list
     except:
-        print("Warning: No snapshot has been made, please to make a commit using the command 'commit' ")
-    
+        print("eroareaaaa")
     thread = threading.Thread(target=repeat_check, daemon=True)
     thread.start()
+
+    
 
     action = input("Enter action (commit | info | status | exit): ").strip().lower()
     
     if action == "commit":
-        save_a_snapshot("Snapshot.json")
+        T = Snapshot()
+        CurrentCommit = CurrentSnapshot = Search()
+        T.file_info_list = CurrentCommit
+        tree.append(T)
+        SaveAllCommits(tree)
     
     elif action == "info":
         print_file_info(CurrentSnapshot)
+    
+    elif action == "Savecom":
+        SaveAllCommits(tree)
     
     elif action == "status": # status between CurrentSnapshot and last Commit
         CurrentSnapshot = Search()
