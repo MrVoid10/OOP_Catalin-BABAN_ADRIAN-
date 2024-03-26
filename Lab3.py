@@ -150,7 +150,7 @@ try:
     CurrentCommit = LastSnapshot = CurrentSnapshot = tree[TreePos].file_info_list
     SNAPSHOT_TIME = tree[TreePos].time
 except:
-    print("eroareaaaa")
+    print("Warning: the snapshots couldnt be loaded, prease use 'commit' to save a snapshot")
 thread = threading.Thread(target=repeat_check, daemon=True)
 thread.start()
 
