@@ -41,7 +41,8 @@ def get_meta_info(filename):
         #spec = "Imagine"
     elif filename.lower().endswith((".txt", ".py")):
         with open(filepath, "r") as file:
-            spec = str(len(file.readlines())) + " Linii"
+            read = file.read()
+            spec = str(len(read.splitlines())) + " Linii " + str(len(read.split())) + " cuvinte " + str(len(read)) + " Caractere"
 
     file_info = FileInfo(
         filename=filename,
