@@ -143,20 +143,19 @@ def LoadAllCommits():
         tree = json.load(file, cls=SnapListDecoder)
     return tree
 
+
+tree = []
+try:
+    tree = LoadAllCommits()
+    CurrentCommit = LastSnapshot = CurrentSnapshot = tree[TreePos].file_info_list
+    SNAPSHOT_TIME = tree[TreePos].time
+except:
+    print("eroareaaaa")
+thread = threading.Thread(target=repeat_check, daemon=True)
+thread.start()
+
 while True:  # main
-    tree = []
-    try:
-        tree = LoadAllCommits()
-        CurrentCommit = LastSnapshot = CurrentSnapshot = tree[TreePos].file_info_list
-        SNAPSHOT_TIME = tree[TreePos].time
-    except:
-        print("eroareaaaa")
-    thread = threading.Thread(target=repeat_check, daemon=True)
-    thread.start()
-
-    
-
-    action = input("Enter action (commit | info | infoc | status | llcommit | lncommit | exit): ").strip().lower()
+    action = input("Enter action (commit | info | status | exit): ").strip().lower()
     
     if action.startswith("commit"):
         words = action.split()
@@ -188,16 +187,26 @@ while True:  # main
         words = action.split()
         if len(words) > 1:
             other_word = words[1]
-            if other_word == "commit":
+            if other_word == "commit" or other_word == "c" :
                 print_file_info(CurrentCommit)
             else:
                 print_file_info_1(CurrentSnapshot,other_word)
         else:
             print_file_info(CurrentSnapshot)
 
-    elif action == "status": # status between CurrentSnapshot and last Commit
-        CurrentSnapshot = Search()
-        check_modified_objects(CurrentSnapshot,CurrentCommit)
+    elif action.startswith("status"): # status between CurrentSnapshot and last Commit
+        words = action.split()
+        if len(words) > 1:
+            other_word = words[1]
+            if other_word == "commit" or other_word == "c":
+                check_modified_objects(CurrentSnapshot,CurrentCommit)
+            elif other_word == "snapshot" or other_word == "s":
+                LastSnapshot = CurrentSnapshot
+                CurrentSnapshot = Search()
+                check_modified_objects(CurrentSnapshot,LastSnapshot)
+        else:
+            CurrentSnapshot = Search()
+            check_modified_objects(CurrentSnapshot,CurrentCommit)
 
     elif action == "exit":
         print("Exiting program.")
