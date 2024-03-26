@@ -3,10 +3,11 @@ import time
 import threading
 import json
 import struct
-import pickle
+import datetime
 
 FOLDER_PATH = "E:\TEMPORARE\Catalin_OOP\MyGit"
 SnapListName = "CommitList.json"
+TreePos = -1
 SNAPSHOT_FOLDER = os.path.join(FOLDER_PATH, "SnapShots")
 SNAPSHOT_TIME = None
 CurrentSnapshot = []
@@ -141,7 +142,8 @@ while True:  # main
     tree = []
     try:
         tree = LoadAllCommits()
-        CurrentCommit = LastSnapshot = CurrentSnapshot = tree[-1].file_info_list
+        CurrentCommit = LastSnapshot = CurrentSnapshot = tree[TreePos].file_info_list
+        SNAPSHOT_TIME = tree[TreePos].time
     except:
         print("eroareaaaa")
     thread = threading.Thread(target=repeat_check, daemon=True)
@@ -149,7 +151,7 @@ while True:  # main
 
     
 
-    action = input("Enter action (commit | info | status | exit): ").strip().lower()
+    action = input("Enter action (commit | info | status | llcommit| lncommit | exit): ").strip().lower()
     
     if action == "commit":
         T = Snapshot()
@@ -161,13 +163,27 @@ while True:  # main
     elif action == "info":
         print_file_info(CurrentSnapshot)
     
-    elif action == "Savecom":
-        SaveAllCommits(tree)
-    
     elif action == "status": # status between CurrentSnapshot and last Commit
         CurrentSnapshot = Search()
         check_modified_objects(CurrentSnapshot,CurrentCommit)
-        
+
+    elif action == "llcommit":
+        TreePos -=1
+        CurrentCommit = tree[TreePos].file_info_list
+        SNAPSHOT_TIME = tree[TreePos].time
+        dt_object = datetime.datetime.fromtimestamp(SNAPSHOT_TIME)
+        print("Loaded previous commit on the date: " + dt_object.strftime("%Y-%m-%d %H:%M:%S"))
+
+    elif action == "lncommit":
+        TreePos +=1
+        if  TreePos < 0:
+            CurrentCommit = tree[TreePos].file_info_list
+            SNAPSHOT_TIME = tree[TreePos].time
+            dt_object = datetime.datetime.fromtimestamp(SNAPSHOT_TIME)
+            print("Loaded next commit on the date: " + dt_object.strftime("%Y-%m-%d %H:%M:%S"))
+        else:
+            print("stop,you are at the last saved commit")
+
     elif action == "exit":
         print("Exiting program.")
         break
