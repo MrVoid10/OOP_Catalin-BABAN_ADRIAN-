@@ -102,6 +102,13 @@ def print_file_info(file_list):
     else:
         print("empty List")
 
+def print_file_info_1(file_list,name):
+    if file_list:
+        for file in file_list:
+            if name == file.filename:
+                print(f"File: {file.filename}    {file.size} bytes  Ct: {file.created}    Md: {file.modified}   Specific: {file.specific}")
+    else:
+        print("empty List")
 def check_modified_objects(FirstList, LastList):
     last_filenames = {file_info.filename for file_info in LastList}
     #print("Check 5 Second")
@@ -151,39 +158,46 @@ while True:  # main
 
     action = input("Enter action (commit | info | infoc | status | llcommit | lncommit | exit): ").strip().lower()
     
-    if action == "commit":
-        T = Snapshot()
-        CurrentCommit = CurrentSnapshot = Search()
-        T.file_info_list = CurrentCommit
-        tree.append(T)
-        SaveAllCommits(tree)
+    if action.startswith("commit"):
+        words = action.split()
+        if len(words) > 1:
+            other_word = words[1]
+            if other_word == "last" or other_word == "l":
+                TreePos -=1
+                CurrentCommit = tree[TreePos].file_info_list
+                NAPSHOT_TIME = tree[TreePos].time
+                dt_object = datetime.datetime.fromtimestamp(SNAPSHOT_TIME)
+                print("Loaded previous commit on the date: " + dt_object.strftime("%Y-%m-%d %H:%M:%S"))
+            elif other_word == "next" or other_word == "n":
+                TreePos +=1
+                if  TreePos < 0:
+                    CurrentCommit = tree[TreePos].file_info_list
+                    SNAPSHOT_TIME = tree[TreePos].time
+                    dt_object = datetime.datetime.fromtimestamp(SNAPSHOT_TIME)
+                    print("Loaded next commit on the date: " + dt_object.strftime("%Y-%m-%d %H:%M:%S"))
+                else:
+                    print("stop,you are at the last saved commit")
+        else:
+            T = Snapshot()
+            CurrentCommit = CurrentSnapshot = Search()
+            T.file_info_list = CurrentCommit
+            tree.append(T)
+            SaveAllCommits(tree)
     
-    elif action == "info":
-        print_file_info(CurrentSnapshot)
+    elif action.startswith("info"):
+        words = action.split()
+        if len(words) > 1:
+            other_word = words[1]
+            if other_word == "commit":
+                print_file_info(CurrentCommit)
+            else:
+                print_file_info_1(CurrentSnapshot,other_word)
+        else:
+            print_file_info(CurrentSnapshot)
 
-    elif action == "infoc":
-        print_file_info(CurrentCommit)
-    
     elif action == "status": # status between CurrentSnapshot and last Commit
         CurrentSnapshot = Search()
         check_modified_objects(CurrentSnapshot,CurrentCommit)
-
-    elif action == "llcommit":
-        TreePos -=1
-        CurrentCommit = tree[TreePos].file_info_list
-        SNAPSHOT_TIME = tree[TreePos].time
-        dt_object = datetime.datetime.fromtimestamp(SNAPSHOT_TIME)
-        print("Loaded previous commit on the date: " + dt_object.strftime("%Y-%m-%d %H:%M:%S"))
-
-    elif action == "lncommit":
-        TreePos +=1
-        if  TreePos < 0:
-            CurrentCommit = tree[TreePos].file_info_list
-            SNAPSHOT_TIME = tree[TreePos].time
-            dt_object = datetime.datetime.fromtimestamp(SNAPSHOT_TIME)
-            print("Loaded next commit on the date: " + dt_object.strftime("%Y-%m-%d %H:%M:%S"))
-        else:
-            print("stop,you are at the last saved commit")
 
     elif action == "exit":
         print("Exiting program.")
