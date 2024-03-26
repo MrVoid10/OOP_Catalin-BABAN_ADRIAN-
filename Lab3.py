@@ -97,12 +97,10 @@ def Search():
 
 def print_file_info(file_list):
     if file_list:
-        print("not empty")
+        for file in file_list:
+            print(f"File: {file.filename}    {file.size} bytes  Ct: {file.created}    Md: {file.modified}   Specific: {file.specific}")
     else:
-        print("empty")
-
-    for file in file_list:
-        print(f"File: {file.filename}    {file.size} bytes  Ct: {file.created}    Md: {file.modified}   Specific: {file.specific}")
+        print("empty List")
 
 def check_modified_objects(FirstList, LastList):
     last_filenames = {file_info.filename for file_info in LastList}
@@ -151,7 +149,7 @@ while True:  # main
 
     
 
-    action = input("Enter action (commit | info | status | llcommit| lncommit | exit): ").strip().lower()
+    action = input("Enter action (commit | info | infoc | status | llcommit| lncommit | exit): ").strip().lower()
     
     if action == "commit":
         T = Snapshot()
@@ -162,6 +160,9 @@ while True:  # main
     
     elif action == "info":
         print_file_info(CurrentSnapshot)
+
+    elif action == "infoc":
+        print_file_info(CurrentCommit)
     
     elif action == "status": # status between CurrentSnapshot and last Commit
         CurrentSnapshot = Search()
