@@ -125,7 +125,7 @@ def check_modified_objects(FirstList, LastList):
             print(f"{current_file_info.filename} - New file")
         else:
             last_file_info = next(file_info for file_info in LastList if file_info.filename == current_file_info.filename)
-            if current_file_info.modified != last_file_info.modified or current_file_info.size != last_file_info.size:
+            if current_file_info.modified != last_file_info.modified or current_file_info.size != last_file_info.size or current_file_info.specific !=last_file_info.specific:
                 print(f"{current_file_info.filename} - Has been modified")
 
     # Check deleted files
