@@ -122,7 +122,11 @@ def repeat_check():
         time.sleep(5)
 
 while True:  # main
-    CurrentCommit = LastSnapshot = CurrentSnapshot = read_snapshot("Snapshot.json") # incarcarea la inceput de program
+    try:
+        CurrentCommit = LastSnapshot = CurrentSnapshot = read_snapshot("Snapshot.json") # incarcarea la inceput de program
+    except:
+        print("No commit has been made, please to make a commit using the command 'commit' ")
+    
     thread = threading.Thread(target=repeat_check, daemon=True)
     thread.start()
 
