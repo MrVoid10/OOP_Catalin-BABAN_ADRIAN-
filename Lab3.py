@@ -2,6 +2,7 @@ import os
 import time
 import threading
 import json
+import struct
 
 FOLDER_PATH = "E:\TEMPORARE\Catalin_OOP\MyGit"
 SNAPSHOT_FOLDER = os.path.join(FOLDER_PATH, "SnapShots")
@@ -13,24 +14,41 @@ FILE_CURRENT_LIST = []
 FILE_NAME_LIST = os.listdir(FOLDER_PATH)
 
 class FileInfo:
-    def __init__(self, filename, size, created, modified):
+    def __init__(self, filename, size, created, modified,specific):
         self.filename = filename
         self.size = size
         self.created = created
         self.modified = modified
+        self.specific = specific
 
 def get_meta_info(filename):
+    if filename == "SnapShots":
+        return None
     filepath = os.path.join(FOLDER_PATH, filename)
+    
     if not os.path.exists(filepath):
         print(f"File '{filename}' not found.")
         return None
 
     stat = os.stat(filepath)
+    spec = ""
+    
+    if filename.lower().endswith((".png", ".jpg")):
+        with open(filepath, "rb") as img_file:
+            img_data = img_file.read(24)
+            width,height = struct.unpack(">II", img_data[16:24])
+        spec = str(width) + ' X ' + str(height)
+        #spec = "Imagine"
+    elif filename.lower().endswith((".txt", ".py")):
+        with open(filepath, "r") as file:
+            spec = str(len(file.readlines())) + " Linii"
+
     file_info = FileInfo(
         filename=filename,
         size=stat.st_size,
         created=time.ctime(stat.st_ctime),
-        modified=time.ctime(stat.st_mtime)
+        modified=time.ctime(stat.st_mtime),
+        specific= spec
     )
     return file_info
 
@@ -82,7 +100,8 @@ def read_snapshot(SAVE_NAME):
             filename=item['filename'],
             size=item['size'],
             created=item['created'],
-            modified=item['modified']
+            modified=item['modified'],
+            specific=item['specific']
         )
         file_info_list.append(file_info)
     return file_info_list
@@ -94,7 +113,7 @@ def print_file_info(file_list):
         print("empty")
 
     for file in file_list:
-        print(f"File:  {file.filename} \t\t {file.size} bytes \t\t Ct: {file.created} \t\t Md: {file.modified}")
+        print(f"File: {file.filename}    {file.size} bytes  Ct: {file.created}    Md: {file.modified}   Specific: {file.specific}")
 
 def check_modified_objects(FirstList, LastList):
     last_filenames = {file_info.filename for file_info in LastList}
@@ -125,7 +144,7 @@ while True:  # main
     try:
         CurrentCommit = LastSnapshot = CurrentSnapshot = read_snapshot("Snapshot.json") # incarcarea la inceput de program
     except:
-        print("No commit has been made, please to make a commit using the command 'commit' ")
+        print("Warning: No snapshot has been made, please to make a commit using the command 'commit' ")
     
     thread = threading.Thread(target=repeat_check, daemon=True)
     thread.start()
