@@ -70,10 +70,14 @@ def get_meta_info(filename):
             width,height = struct.unpack(">II", img_data[16:24])
         spec = str(width) + ' X ' + str(height)
         #spec = "Imagine"
-    elif filename.lower().endswith((".txt", ".py")):
+    elif filename.lower().endswith((".txt")):
         with open(filepath, "r") as file:
             read = file.read()
             spec = str(len(read.splitlines())) + " Linii " + str(len(read.split())) + " cuvinte " + str(len(read)) + " Caractere"
+    elif filename.lower().endswith((".py")):
+        with open(filepath, "r") as file:
+            read = file.read()
+            spec = str(len(read.splitlines())) + " Linii " + str(read.lower().count("class")) + " Classes " + str(read.lower().count("def")) + " Methodes"
 
     file_info = FileInfo(
         filename=filename,
