@@ -1,0 +1,81 @@
+/* Base styles for the body */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f7f7f7;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  /* Styling the form elements */
+  form {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  input[type='text'],
+  input[type='password'],
+  input[type='email'] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box; 
+  }
+  
+  /* Styling the buttons */
+  input[type='submit'] {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    background-color: #5cb85c;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  input[type='submit']:hover {
+    background-color: #4cae4c;
+  }
+  
+  /* Link styles for password recovery and signup */
+  a {
+    text-decoration: none;
+    color: #5cb85c;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Helper text like 'Forgot your password?' */
+  .help-text {
+    text-align: center;
+    margin-top: 10px;
+  }
+  
+  /* Styles for the container of the forms */
+  .container {
+    max-width: 300px;
+    margin: auto;
+  }
+  
+  .error-message {
+    color: red;
+    font-size: 0.8em;
+    height: 20px;
+    margin-top: 5px;
+  }
+
+  /* Additional styles for headings */
+  h2 {
+    color: #333;
+    text-align: center;
+  }
+  
