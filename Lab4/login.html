@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <form id="login-form">
+        <label for="email">Email Address:</label>
+        <input type="email" id="email" name="email" required>
+        <div id="emailError" class="error-message"></div>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <div id="passwordError" class="error-message"></div>
+
+        <input type="submit" value="Submit">
+    </form>
+
+    <!-- Add the "Forgot Password," "Create Account," and "Home" buttons -->
+    <button onclick="redirectToForgotPassword()">Forgot Password</button>
+    <button onclick="redirectToSignup()">Create Account</button>
+    <button onclick="redirectToHome()">Home</button>
+</div>
+<script src="login.js"></script>
+<script>
+    // Function to redirect to the forgot password page
+    function redirectToForgotPassword() {
+        window.location.href = 'recovery.html'; // Replace with your actual forgot password page URL
+    }
+
+    // Function to redirect to the signup page
+    function redirectToSignup() {
+        window.location.href = 'signup.html'; // Replace with your actual signup page URL
+    }
+
+    // Function to redirect to the home page
+    function redirectToHome() {
+        window.location.href = 'main.html'; // Replace with your actual home page URL
+    }
+</script>
+</body>
+</html>
