@@ -1,0 +1,8 @@
+there is needed to import:
+pip install flask
+pip install flask_cors
+pip install
+pip install smtplib
+make a env for:
+    psycopg2
+    from dotenv import load_dotenv 
