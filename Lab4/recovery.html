@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Recovery</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Password Recovery</h1>
+    <form id="emailForm">
+        <label for="email">Enter your email:</label>
+        <input type="email" id="email" required>
+        <button type="submit">Send Verification Code</button>
+    </form>
+
+    <form id="codeForm" style="display: none;">
+        <label for="code">Verification Code:</label>
+        <input type="text" id="code" required>
+        <label for="newPassword">New Password:</label>
+        <input type="password" id="newPassword" required>
+        <button type="submit">Change Password</button>
+    </form>
+
+    <!-- Add the "Back to Login" and "Home" buttons -->
+    <button onclick="redirectToLogin()">Back to Login</button>
+    <button onclick="redirectToHome()">Home</button>
+
+    <script src="recovery.js"></script>
+    <script>
+        // Function to redirect to the login page
+        function redirectToLogin() {
+            window.location.href = 'login.html'; // Replace with your actual login page URL
+        }
+
+        // Function to redirect to the home page
+        function redirectToHome() {
+            window.location.href = 'main.html'; // Replace with your actual home page URL
+        }
+    </script>
+</body>
+</html>
