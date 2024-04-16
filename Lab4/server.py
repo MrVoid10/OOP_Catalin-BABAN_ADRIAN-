@@ -13,7 +13,7 @@ from Email import *
 app = Flask(__name__)
 CORS(app)
 
-# Initialize user data list
+# Initialize user data list, Old way without DB
 user_data = [
     {"username": "adrytimus", "email": "adrytimus@gmail.com", "hashed_password": "12345"},
 ]
